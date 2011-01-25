@@ -1,5 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
+import sys
+import os
 import serial
 import time
 import datetime
@@ -588,8 +590,60 @@ q""" )
 ###################################################################################################
 # main
 
-bm = CBM( "/dev/cu.usbmodem001" )
-bm.wbsl_download( "eZChronos.txt" )
-bm.spl_sync()
 
+from optparse import OptionParser
 
+version = "0.1"
+usage = "usage: %prog [options] rfbsl|sync|prg [<arguments> ...]"
+parser = OptionParser( usage=usage, version="%prog "+version )
+parser.add_option( "-d", "--device", dest="device", metavar="DEVICE",
+		help="specify USB device of Base Module, will guess if ommited" )
+parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=True,
+		help="show CBM communication" )
+
+(opt, args) = parser.parse_args()
+
+#Command must be given
+if len( args ) == 0:
+	print "ERROR: you must specify a command"
+	sys.exit( 5 )
+
+#If no device option given, try to guess
+if not opt.device:
+	device_guess = ["/dev/ttyUSB0", "/dev/cu.usbmodem001"]
+	for path in device_guess:
+		if os.path.exists( path ):
+			opt.device = path
+#Check for device
+if (not opt.device) or (not os.path.exists( opt.device )):
+	print "ERROR: no Base Module device found, please specify as option"
+	sys.exit( 6 )
+
+command = args[0]
+if command == "rfbsl":
+	if len( args ) < 2:
+        	print "ERROR: command rfbsl requires file name as argument"
+        	sys.exit( 5 )
+	file = args[1]
+	if not os.path.isfile( file ):
+		print "ERROR: cannot open", file
+		sys.exit( 7 )
+	bm = CBM( opt.device )
+	bm.wbsl_download( file )
+elif command == "sync":
+	bm = CBM( opt.device )
+	bm.spl_sync()
+elif command == "prg":
+	if len( args ) < 2:
+        	print "ERROR: command prg requires file name as argument"
+        	sys.exit( 5 )
+	file = args[1]
+	if not os.path.isfile( file ):
+		print "ERROR: cannot open", file
+		sys.exit( 7 )
+	bm = CBM( opt.device )
+	bm.wbsl_download( "eZChronos.txt" )
+	bm.spl_sync()
+else:
+	print "ERROR: invalid command:", command
+	sys.exit( 4 )
