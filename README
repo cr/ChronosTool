@@ -16,6 +16,15 @@ Changelog:
 Example:
 	./CronosTool.py -d /dev/ttyACM3 prg eZChronos.txt
 
-More info on the TI eZ430-Chronos:
-	http://processors.wiki.ti.com/index.php/EZ430-Chronos
+Ressources:
+	- More info on the TI eZ430-Chronos:
+	  http://processors.wiki.ti.com/index.php/EZ430-Chronos
 
+	- OpenChronos, msp430-gcc-friendly TI firmware clone:
+	  https://github.com/poelzi/OpenChronos
+
+	- mspdebug, open-source debugger and programmer for the eZ430U:
+	  http://mspdebug.sourceforge.net/
+
+	- How to install the MSP430 toolchain under MAC OS X:
+	  http://www.senslab.info/?p=425
