@@ -45,7 +45,7 @@
 # *************************************************************************************************
 #
 ###################################################################################################
-global version = "0.1"
+version = "0.1"
 # Changelog:
 #   0.1 - public preview version
 #
@@ -618,7 +618,6 @@ q""" )
 
 from optparse import OptionParser
 
-version = "0.1"
 usage = "usage: %prog [options] rfbsl|sync|prg [<arguments> ...]"
 parser = OptionParser( usage=usage, version="%prog "+version )
 parser.add_option( "-d", "--device", dest="device", metavar="DEVICE",
