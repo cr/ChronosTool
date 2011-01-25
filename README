@@ -16,3 +16,6 @@ Changelog:
 Example:
 	./CronosTool.py -d /dev/ttyACM3 prg eZChronos.txt
 
+More info on the TI eZ430-Chronos:
+	http://processors.wiki.ti.com/index.php/EZ430-Chronos
+
