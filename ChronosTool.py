@@ -666,7 +666,7 @@ elif command == "prg":
 		print "ERROR: cannot open", file
 		sys.exit( 7 )
 	bm = CBM( opt.device )
-	bm.wbsl_download( "eZChronos.txt" )
+	bm.wbsl_download( file )
 	bm.spl_sync()
 else:
 	print "ERROR: invalid command:", command
