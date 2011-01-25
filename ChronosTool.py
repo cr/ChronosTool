@@ -92,9 +92,6 @@ class CBMcmd():
 	def getitem( self ):
 		return self.tobytes()
 
-#x = CBMcmd( 0x47, "abcdefg" )
-#print x.tohex()
-
 ###################################################################################################
 class CBMpayload:
 	"Class for handling Chronos Base Module command payloads"
@@ -108,9 +105,6 @@ class CBMpayload:
 
 	def tocmd( self, opcode ):
 		return CBMcmd( opcode, self.data )
-
-#x = CBMpayload( "abcdefghijklmnop" )
-#print x.tocmd(0x47).tohex()
 
 ###################################################################################################
 class CBMburst:
@@ -143,11 +137,6 @@ class CBMburst:
 			payloads.append( payload )
 		return payloads
 
-#x = CBMburst( 0x01, "ABCDEFGHIJKLMNOPQRTUVWXYZabcdefghijklmnopq" )
-#print x.topayloads()[0].tocmd(0x47).tohex()
-#print x.topayloads()[1].tocmd(0x47).tohex()
-
-
 ###################################################################################################
 class CBMchunk:
 	"Class for Chronos Base Module chunks"
@@ -175,11 +164,6 @@ class CBMchunk:
 			chunk = chunk[max_burst_len:]
 			bursts.append( burst )
 		return bursts
-
-#x = CBMchunk( 0xa000, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" )
-#for b in x.tobursts():
-#	for p in b.topayloads():
-#		print p.tocmd(0x47).tohex()
 
 ###################################################################################################
 class CBMdata:
@@ -243,15 +227,6 @@ class CBMdata:
 
 	def tochunks( self ):
 		return self.chunks
-
-
-#data = CBMdata()
-#data.importtxt( "ram_based_updater.txt" )
-#for c in data.tochunks():
-#	for b in c.tobursts():
-#		for p in b.topayloads():
-#			print p.tocmd(0x47).tohex()
-
 
 ###################################################################################################
 class CBM:
@@ -641,7 +616,6 @@ q""" )
 ###################################################################################################
 # main
 
-
 from optparse import OptionParser
 
 version = "0.1"
@@ -698,3 +672,4 @@ elif command == "prg":
 else:
 	print "ERROR: invalid command:", command
 	sys.exit( 4 )
+
