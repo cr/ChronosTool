@@ -175,57 +175,38 @@ class CBMdata:
 
 	def importtxt( self, src ):
 		if isinstance( src, str ):
-			lines = src.split( "\n" )
-			if len( lines ) == 1:
-				filename = lines[0]
-				file = open( filename, "r" )
-				lines = file.readlines()
+			if os.path.exists( src ):
+				file = open( src, "r" )
+				input = file.read()
 				file.close()
 			else:
-				if not lines[0][0] == '@':
-					lines = []
+				input = src
 		elif isinstance( src, list ):
-			lines = src
+			input = src
+		elif isinstance( src, bytearray ):
+			input = str( src )
 		else:
-			lines = []
-
-		# Detect malformed txt file
-		if lines[0][0] != '@' or lines[-1].strip() != 'q':
-			lines = []
-
-		if len( lines ) != 0:
-
-			# Remove the final q-line
-			lines.pop()
-
-			# Iterate the chunks
-			# Create a list of [ address, data ] per chunk
-			chunk_data = bytearray()
-			for line in lines:
-				line = line.strip()
-				if line[0] == '@':
-					if chunk_data:
-						self.chunks.append( CBMchunk( address, chunk_data ) )
-					# New chunk starts with two-byte @address
-					address = int( line[1:], 16 )
-					print "New chunk found at address @" + hex(address)
-					chunk_data = bytearray()
-				else:
-					data = line.replace( ' ', '' ).decode( 'hex' )
-					chunk_data += bytearray( data )
-			# Write out last chunk
-			if chunk_data:
-				self.chunks.append( CBMchunk( address, chunk_data ) )
-			else:
-				print "Error importing data."
-				sys.exit( 9 )
-		else:
-			print "Error importing data."
+			print "ERROR: unable to handle argument to importtxt"
 			sys.exit( 9 )
 
-		# Print chunks summary
-		for chunk in self.chunks:
-			print "Chunk @" + hex(chunk.address), "length", len(chunk.data)
+		# Flatten string by removing spaces and newlines
+		input = input.replace( ' ', '' ).replace( '\n', '' )
+
+		# Minimal sanity check
+		if input[0] != '@' or input[-1] != 'q':
+			print "ERROR: malformed import data"
+			sys.exit( 9 )
+
+		# Remove first @ and final q and split into chunks
+		chunks = input[1:-1].split( '@' )
+
+		# Iterate chunks, append to instance
+		for chunk in chunks:
+			# First two bytes are address
+			address = int( chunk[:4], 16 )
+			data = bytearray( chunk[4:].decode( 'hex' ) )
+			print "Chunk at address @" + hex(address) + ", length", len(data)
+			self.chunks.append( CBMchunk( address, data ) )
 
 	def tochunks( self ):
 		return self.chunks
