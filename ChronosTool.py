@@ -218,8 +218,10 @@ class CBMdata:
 				self.chunks.append( CBMchunk( address, chunk_data ) )
 			else:
 				print "Error importing data."
+				sys.exit( 9 )
 		else:
 			print "Error importing data."
+			sys.exit( 9 )
 
 		# Print chunks summary
 		for chunk in self.chunks:
@@ -230,7 +232,7 @@ class CBMdata:
 
 ###################################################################################################
 class CBM:
-	"Class for the Chronos base module"
+	"Class for the Chronos Base Module"
 
 	def __init__( self, device_name ):
 		print 'Using Chronos Base Module on', device_name
@@ -381,7 +383,7 @@ class CBM:
 		payload[0x0d] = meters&0xff
 
 		self.spl_start()
-		raw_input("Put your watch in sync mode and press return...")
+		raw_input("Put your watch in sync mode, wait a few seconds, and press return...")
 		time.sleep( 2 )
 		self.sendcmd( 0x31, payload ) #BM_SYNC_SendCommand
 		time.sleep( 2 )
@@ -411,7 +413,7 @@ class CBM:
 						self.sendburst( burstlist[0] )
 						burstlist = burstlist[1:]
 					else:
-						print "WARNING: Burstlist underflow!"
+						print "WARNING: Burstlist underflow"
 						time.sleep(0.05)
 				else:			#WBSL_COMPLETE
 					done = 1
@@ -606,8 +608,8 @@ q""" )
 		data = CBMdata()
 		data.importtxt( txtdata )
 
-		print "Put your watch in rfbl \"open\" mode and press return."
-		raw_input( "Afterwards, wait for a few seconds and start rfbl download..." )
+		print "Put your watch in rfbl \"open\" mode and press return. Afterwards,"
+		raw_input( "wait for a few seconds and start rfbl download on the watch..." )
 
 		self.transmitburst( updater )
 		self.transmitburst( data )		
@@ -646,7 +648,7 @@ if (not opt.device) or (not os.path.exists( opt.device )):
 command = args[0]
 if command == "rfbsl":
 	if len( args ) < 2:
-        	print "ERROR: command rfbsl requires file name as argument"
+        	print "ERROR: rfbsl requires file name as argument"
         	sys.exit( 5 )
 	file = args[1]
 	if not os.path.isfile( file ):
@@ -659,7 +661,7 @@ elif command == "sync":
 	bm.spl_sync()
 elif command == "prg":
 	if len( args ) < 2:
-        	print "ERROR: command prg requires file name as argument"
+        	print "ERROR: prg requires file name as argument"
         	sys.exit( 5 )
 	file = args[1]
 	if not os.path.isfile( file ):

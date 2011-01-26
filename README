@@ -14,7 +14,7 @@ Changelog:
 	0.1 - public preview version
 
 Example:
-	./CronosTool.py -d /dev/ttyACM3 prg eZChronos.txt
+	./ChronosTool.py -d /dev/ttyACM3 prg eZChronos.txt
 
 Ressources:
 	- More info on the TI eZ430-Chronos:
@@ -28,3 +28,4 @@ Ressources:
 
 	- How to install the MSP430 toolchain under MAC OS X:
 	  http://www.senslab.info/?p=425
+	  (MacPorts version works fine for me.)
