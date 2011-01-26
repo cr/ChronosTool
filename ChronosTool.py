@@ -345,8 +345,13 @@ class CBM:
 		return self.sendcmd( 0x47, payload )
 
 	def spl_sync( self, dt=[], celsius=0, meters=0 ):
+		self.spl_start()
+		raw_input("Put your watch in sync mode, wait a few seconds, and press return...")
+		time.sleep( 2 )
+
 		if not dt:
 			dt = datetime.datetime.now()
+
 		payload = bytearray( 0x13 )
 		payload[0x00] = 0x03
 		payload[0x01] = dt.hour+0x80 #assume 24h
@@ -363,9 +368,6 @@ class CBM:
 		payload[0x0c] = meters>>8
 		payload[0x0d] = meters&0xff
 
-		self.spl_start()
-		raw_input("Put your watch in sync mode, wait a few seconds, and press return...")
-		time.sleep( 2 )
 		self.sendcmd( 0x31, payload ) #BM_SYNC_SendCommand
 		time.sleep( 2 )
 		self.spl_stop()
