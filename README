@@ -4,11 +4,13 @@ Tool for programming TI eZ430-Chronos watches
 Features:
 	- Full support for rfbsl "over the air" updates
 	- Sync time with local clock
-	- limited device auto detection
+	- Limited device auto detection
 
 Todo:
-	- make output less verbose
-	- reading features, f.e. acceleration data streaming
+	- Make output less verbose
+	- Sync protocol reading features, f.e. acceleration data streaming
+	- Implement error recovery (Section 3.6.3.3 of the eZ430-Chronos
+	  Development Tool User's Guide)
 
 Changelog:
 	0.1 - public preview version
