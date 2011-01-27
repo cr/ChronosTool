@@ -45,10 +45,11 @@
 # *************************************************************************************************
 #
 ###################################################################################################
-version = "0.1"
+version = "0.2"
 # Changelog:
 #   0.1 - public preview version
-#
+#   0.2 - import rewritten
+#       - sync time accuracy fix
 ###################################################################################################
 
 import sys
@@ -591,8 +592,8 @@ q""" )
 		data = CBMdata()
 		data.importtxt( txtdata )
 
-		print "Put your watch in rfbl \"open\" mode and press return. Afterwards,"
-		raw_input( "wait for a few seconds and start rfbl download on the watch..." )
+		print "Put your watch in rfbsl \"open\" mode and press return. Afterwards,"
+		raw_input( "wait for a few seconds and start rfbsl download on the watch..." )
 
 		self.transmitburst( updater )
 		self.transmitburst( data )		
