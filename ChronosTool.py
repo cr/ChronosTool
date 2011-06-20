@@ -125,7 +125,7 @@ class CBMburst:
 	@classmethod
 	def setmaxlen( cls, len ):
 		cls.max_burst_len = len
-		print "Maximum CBM burst length set to", hex( len )
+		print >> sys.stderr, "Maximum CBM burst length set to", hex( len )
 
 	def topayloads( self ):
 		#Reshape each burst into payloads
@@ -217,7 +217,7 @@ class CBM:
 	"Class for the Chronos Base Module"
 
 	def __init__( self, device_name ):
-		print 'Using Chronos Base Module on', device_name
+		print >> sys.stderr, 'Using Chronos Base Module on', device_name
 		self.device = serial.Serial( device_name, 115200, timeout = 1 )
 		self.allstatus()
 		self.reset()
@@ -229,19 +229,19 @@ class CBM:
 		self.allstatus()
 
 	def __del__( self ):
-		print 'Closing Chronos Base Module at', self.device.port
+		print >> sys.stderr, 'Closing Chronos Base Module at', self.device.port
 		#self.reset()
 		self.device.close
 
 	def send( self, cmd ):
 		self.device.write( cmd.tostr() )
 		time.sleep( 0.015 )
-		print 'SENT:', cmd.tohex()
+		print >> sys.stderr, 'SENT:', cmd.tohex()
 		response = bytearray( self.device.read( 3 ) )
 		if response[2] > 3:
 			response += bytearray( self.device.read( response[2]-3 ) )
 		self.response = CBMcmd( response[1], response[3:] )
-		print 'RECV:', self.response.tohex()
+		print >> sys.stderr, 'RECV:', self.response.tohex()
 		return self.response
 
 	def sendcmd( self, opcode, payload=[] ):
