@@ -125,7 +125,8 @@ class CBMburst:
 	@classmethod
 	def setmaxlen( cls, len ):
 		cls.max_burst_len = len
-		print >> sys.stderr, "Maximum CBM burst length set to", hex( len )
+		if opt.verbose:
+			print >> sys.stderr, "Maximum CBM burst length set to", hex( len )
 
 	def topayloads( self ):
 		#Reshape each burst into payloads
@@ -187,7 +188,7 @@ class CBMdata:
 		elif isinstance( src, bytearray ):
 			input = str( src )
 		else:
-			print "ERROR: unable to handle argument to importtxt"
+			print >> sys.stderr, "ERROR: unable to handle argument to importtxt"
 			sys.exit( 9 )
 
 		# Flatten string by removing spaces and newlines
@@ -195,7 +196,7 @@ class CBMdata:
 
 		# Minimal sanity check
 		if input[0] != '@' or input[-1] != 'q':
-			print "ERROR: malformed import data"
+			print >> sys.stderr, "ERROR: malformed import data"
 			sys.exit( 9 )
 
 		# Remove first @ and final q and split into chunks
@@ -206,7 +207,8 @@ class CBMdata:
 			# First two bytes are address
 			address = int( chunk[:4], 16 )
 			data = bytearray( chunk[4:].decode( 'hex' ) )
-			print "Chunk at address @" + hex(address) + ", length", len(data)
+			if opt.verbose:
+				print >> sys.stderr, "Chunk at address @" + hex(address) + ", length", len(data)
 			self.chunks.append( CBMchunk( address, data ) )
 
 	def tochunks( self ):
@@ -217,11 +219,15 @@ class CBM:
 	"Class for the Chronos Base Module"
 
 	def __init__( self, device_name ):
-		print >> sys.stderr, 'Using Chronos Base Module on', device_name
+		if opt.verbose:
+			print >> sys.stderr, 'Using Chronos Base Module on', device_name
+		#opt will be decomissioned by the time __del__ is called
+		self.optverbose = opt.verbose
 		self.device = serial.Serial( device_name, 115200, timeout = 1 )
 		self.allstatus()
-		self.reset()
-		self.allstatus()
+		if opt.reset:
+			self.reset()
+			self.allstatus()
 		#Original Chronos tool reads twice
 		response = self._wbsl_getmaxpayload()
 		response = self._wbsl_getmaxpayload()
@@ -229,19 +235,22 @@ class CBM:
 		self.allstatus()
 
 	def __del__( self ):
-		print >> sys.stderr, 'Closing Chronos Base Module at', self.device.port
+		if self.optverbose:
+			print >> sys.stderr, 'Closing Chronos Base Module at', self.device.port
 		#self.reset()
 		self.device.close
 
 	def send( self, cmd ):
 		self.device.write( cmd.tostr() )
 		time.sleep( 0.015 )
-		print >> sys.stderr, 'SENT:', cmd.tohex()
+		if opt.verbose:
+			print >> sys.stderr, 'SENT:', cmd.tohex()
 		response = bytearray( self.device.read( 3 ) )
 		if response[2] > 3:
 			response += bytearray( self.device.read( response[2]-3 ) )
 		self.response = CBMcmd( response[1], response[3:] )
-		print >> sys.stderr, 'RECV:', self.response.tohex()
+		if opt.verbose:
+			print >> sys.stderr, 'RECV:', self.response.tohex()
 		return self.response
 
 	def sendcmd( self, opcode, payload=[] ):
@@ -413,7 +422,8 @@ class CBM:
 						self.sendburst( burstlist[0] )
 						burstlist = burstlist[1:]
 					else:
-						print "WARNING: Burstlist underflow"
+						if opt.verbose:
+							print >> sys.stderr, "WARNING: Burstlist underflow"
 						time.sleep(0.05)
 				else:			#WBSL_COMPLETE
 					done = 1
@@ -624,14 +634,16 @@ usage = "usage: %prog [options] rfbsl|sync|prg [<arguments> ...]"
 parser = OptionParser( usage=usage, version="%prog "+version )
 parser.add_option( "-d", "--device", dest="device", metavar="DEVICE",
 		help="specify USB device of Base Module, will guess if ommited" )
-parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=True,
+parser.add_option( "-n", "--noreset", action="store_false", dest="reset", default=True,
+		help="skip Base Module reset, for resuming streaming etc." )
+parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
 		help="show CBM communication" )
 
 (opt, args) = parser.parse_args()
 
 #Command must be given
 if len( args ) == 0:
-	print "ERROR: you must specify a command"
+	print >> sys.stderr, "ERROR: you must specify a command"
 	sys.exit( 5 )
 
 #If no device option given, try to guess
@@ -642,17 +654,17 @@ if not opt.device:
 			opt.device = path
 #Check for device
 if (not opt.device) or (not os.path.exists( opt.device )):
-	print "ERROR: no Base Module device found, please specify as option"
+	print >> sys.stderr, "ERROR: no Base Module device found, please specify as option"
 	sys.exit( 6 )
 
 command = args[0]
 if command == "rfbsl":
 	if len( args ) < 2:
-        	print "ERROR: rfbsl requires file name as argument"
+        	print >> sys.stderr, "ERROR: rfbsl requires file name as argument"
         	sys.exit( 5 )
 	file = args[1]
 	if not os.path.isfile( file ):
-		print "ERROR: cannot open", file
+		print >> sys.stderr, "ERROR: cannot open", file
 		sys.exit( 7 )
 	bm = CBM( opt.device )
 	bm.wbsl_download( file )
@@ -661,11 +673,11 @@ elif command == "sync":
 	bm.spl_sync()
 elif command == "prg":
 	if len( args ) < 2:
-        	print "ERROR: prg requires file name as argument"
+        	print >> sys.stderr, "ERROR: prg requires file name as argument"
         	sys.exit( 5 )
 	file = args[1]
 	if not os.path.isfile( file ):
-		print "ERROR: cannot open", file
+		print >> sys.stderr, "ERROR: cannot open", file
 		sys.exit( 7 )
 	bm = CBM( opt.device )
 	bm.wbsl_download( file )
@@ -678,6 +690,6 @@ elif command == "accel":
                 if data[0]:
                         print str( data[1] ) + " " + str( data[2] ) + " " + str( data[3] )
 else:
-	print "ERROR: invalid command:", command
+	print >> sys.stderr, "ERROR: invalid command:", command
 	sys.exit( 4 )
 
