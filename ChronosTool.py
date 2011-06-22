@@ -261,7 +261,7 @@ class CBM:
 		return self.sendcmd( 0x07 )		#BM_SPL_Start
 
 	def _spl_getdata( self ):
-		return self.sendcmd( 0x08, [0x00, 0x00, 0x00, 0x00] )	#BM_GetStatus
+		return self.sendcmd( 0x08, [0x00, 0x00, 0x00, 0x00] )	#BM_GetData
 
 	def _spl_stop( self ):
 		return self.sendcmd( 0x09 )		#BM_SPL_Stop
@@ -298,7 +298,23 @@ class CBM:
 		return self._spl_start()
 
 	def spl_getdata( self ):
-		return self._spl_getdata()
+		return self._spl_getdata().payload
+
+	def spl_getaccel( self ):
+		data = self._spl_getdata().payload
+		ret = [ False, 0, 0, 0 ]
+		if data[0] == 0x01:
+			xval = data[1]
+			yval = data[2]
+			zval = data[3]
+			if xval > 128:
+				xval -= 256
+			if yval > 128:
+				yval -= 256
+			if zval > 128:
+				zval -= 256
+			ret = [ True, xval, yval, zval ]
+		return ret
 
 	def spl_stop( self ):
 		self._spl_start()
@@ -654,6 +670,13 @@ elif command == "prg":
 	bm = CBM( opt.device )
 	bm.wbsl_download( file )
 	bm.spl_sync()
+elif command == "accel":
+        bm = CBM( opt.device )
+        bm.spl_start()
+        while True:
+                data = bm.spl_getaccel()
+                if data[0]:
+                        print str( data[1] ) + " " + str( data[2] ) + " " + str( data[3] )
 else:
 	print "ERROR: invalid command:", command
 	sys.exit( 4 )
