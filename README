@@ -16,6 +16,9 @@ Changelog:
 	0.1 - public preview version
 	0.2 - import rewritten
 	    - sync time accuracy fix
+	0.3 - verbosity option
+	    - noreset option
+	    - acceleration data streaming
 
 Example:
 	./ChronosTool.py -d /dev/ttyACM3 prg eZChronos.txt
