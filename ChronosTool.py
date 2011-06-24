@@ -312,6 +312,28 @@ class CBM:
 	def spl_getdata( self ):
 		return self._spl_getdata().payload
 
+	def _bit_value( self, val, bit_nr ):
+		return ( val >> bit_nr ) & 1
+
+	def _mgrav_accel( self, raw ):
+		# Conversion values from data to mgrav taken
+		# from CMA3000-D0x datasheet (rev 0.4, table 4)
+		mgrav_per_bit = [ 18, 36, 71, 143, 286, 571, 1142 ]
+
+		# fix signedness: uint8 to int8
+		if raw > 128:
+			sign = -1
+			absraw = -raw
+		else:
+			sign = 1
+			absraw = raw
+
+		mgrav = 0
+		for n in range( 7 ):
+			mgrav += mgrav_per_bit[n] * self._bit_value( absraw, n )
+
+		return sign * mgrav / 1000.0
+
 	def spl_getaccel( self ):
 		data = self._spl_getdata().payload
 		ret = [ False, 0, 0, 0 ]
@@ -319,12 +341,16 @@ class CBM:
 			xval = data[1]
 			yval = data[2]
 			zval = data[3]
-			if xval > 128:
-				xval -= 256
-			if yval > 128:
-				yval -= 256
-			if zval > 128:
-				zval -= 256
+			if opt.raw:
+				# just fix signedness
+				if xval > 128: xval -= 256
+				if yval > 128: yval -= 256
+				if zval > 128: zval -= 256
+			else:
+				# mgrav conversion and g/2 Z axis shift
+				xval = self._mgrav_accel( xval )
+				yval = self._mgrav_accel( yval )
+				zval = self._mgrav_accel( zval ) + 0.42
 			ret = [ True, xval, yval, zval ]
 		return ret
 
@@ -633,12 +659,14 @@ q""" )
 
 from optparse import OptionParser
 
-usage = "usage: %prog [options] rfbsl|sync|prg [<arguments> ...]"
+usage = "usage: %prog [options] rfbsl|sync|prg|accel [<arguments> ...]"
 parser = OptionParser( usage=usage, version="%prog "+version )
 parser.add_option( "-d", "--device", dest="device", metavar="DEVICE",
 		help="specify USB device of Base Module, will guess if ommited" )
 parser.add_option( "-n", "--noreset", action="store_false", dest="reset", default=True,
 		help="skip Base Module reset, for resuming streaming etc." )
+parser.add_option( "-r", "--raw", action="store_true", dest="raw", default=False,
+		help="output raw sensor data" )
 parser.add_option( "-v", "--verbose", action="store_true", dest="verbose", default=False,
 		help="show CBM communication" )
 
